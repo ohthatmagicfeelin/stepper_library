@@ -11,4 +11,7 @@ const int MS1_PIN = 16;
 const int MS2_PIN = 17;
 const int MS3_PIN = 5;
 
+// Potentiometer
+const int POT_POIN = 22;
+
 #endif
