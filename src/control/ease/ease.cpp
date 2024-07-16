@@ -66,8 +66,8 @@ float Easer::_getStepsToDestination(float revolutions, float stepsPerRev) {
 // -------------------------
 float Easer::_calculateDeltaDisplacement(float tPercent, const float granularityPrecent) {
     float deltaT = tPercent - granularityPrecent;
-    float currentDisplacePercent = easingFunction(_easeType, tPercent); 
-    float previousDisplacePercent = easingFunction(_easeType, constrain(deltaT, 0.0f, 1000.0f)); // no maximum constraint 
+    float currentDisplacePercent = applyEasingCurve(_easeType, tPercent); 
+    float previousDisplacePercent = applyEasingCurve(_easeType, constrain(deltaT, 0.0f, 1000.0f)); // no maximum constraint 
     float deltaD = currentDisplacePercent - previousDisplacePercent;
     return deltaD;
 }

@@ -15,9 +15,12 @@ SetpointTracker::SetpointTracker(
         _stepPulsePeriod(stepPulsePeriod)
         {}
 
+long SetpointTracker::_calculatePositionError() {
+    return _setpoint - _positionTrackerInstance.currentPosition;
+}
 
 void SetpointTracker::_checkIfSetpointSatisfied() {
-  if ( (-_setpointError < _setpoint - _positionTrackerInstance.currentPosition) && (_setpoint - _positionTrackerInstance.currentPosition < _setpointError) ) {
+  if ( (-_setpointTolerance < _calculatePositionError()) && (_calculatePositionError() < _setpointTolerance) ) {
     _isSetpointStatisfied = true;
   }
   else {
@@ -27,10 +30,10 @@ void SetpointTracker::_checkIfSetpointSatisfied() {
 
 
 void SetpointTracker::_updateDirection() {
-  if (_setpoint - _positionTrackerInstance.currentPosition > _setpointError) {
+  if (_calculatePositionError() > _setpointTolerance) {
     _motorInstance.setDirection(CLOCKWISE);
   }
-  else if (_setpoint - _positionTrackerInstance.currentPosition < -_setpointError) {
+  else if (_calculatePositionError() < -_setpointTolerance) {
     _motorInstance.setDirection(COUNTER_CLOCKWISE);
   }
 }
@@ -50,35 +53,35 @@ void SetpointTracker::_updateSetpointTracking() {
 }
 
 
-Settings applyAcceleration(Settings settings) {
-  if (abs(settings.ctrl.setpoint - settings.ctrl.currentPosition) < 980) {
-    settings.ctrl.stepPulsePeriod = settings.ctrl.stepPulsePeriod + 1;
-    settings.ctrl.accelerationCounter++;
+void SetpointTracker::_applyAcceleration() {
+  /* Linear acceleration and deceleration for first and last part of motor movement
+     Constant velocity for middle part of motor movement.
+     */
+
+  if (abs(_calculatePositionError()) < _maxStepPeriod) {
+    _stepPulsePeriod = _stepPulsePeriod + 1;
+    _accelerationCounter++;
   }
-  else if (settings.ctrl.accelerationCounter == 0) {
-    settings.ctrl.stepPulsePeriod = 20;
+  else if (_accelerationCounter == 0) {
+    _stepPulsePeriod = _minStepPeriod;
   }
   else {
-    settings.ctrl.accelerationCounter--;
-    settings.ctrl.stepPulsePeriod = settings.ctrl.stepPulsePeriod - 1;
+    _stepPulsePeriod = _stepPulsePeriod - 1;
+    _accelerationCounter--;
   }
-  return settings;
 }
 
 
 void SetpointTracker::setpointTracking() {
     
-
     while(_exitCondition) { // digitalRead(selectButtonPin) == LOW
       _updateSetpointTracking();
-      settings.ctrl.stepPulsePeriod = 1000;
-      settings.ctrl.accelerationCounter = 980;
+
       while (!_isSetpointStatisfied) {
-        
-        settings = applyAcceleration(settings);
-        
+        _applyAcceleration();
         _updateSetpointTracking();
-        _positionTrackerInstance.trackCurrentPosition();
+
+        _positionTrackerInstance.trackCurrentPosition(_motorInstance.getDirection());
         _motorInstance.step(_stepPulsePeriod);
       }
 
