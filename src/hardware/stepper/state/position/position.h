@@ -3,7 +3,7 @@
 #ifndef POSITION_TRACKER_H
 #define POSITION_TRACKER_H
 
-#include "../../hardware/stepper/stepper.h"
+#include "../state.h"
 
 class PositionTracker {
 
@@ -12,12 +12,14 @@ public:
         long currentPosition = 0
     );
 
-    long currentPosition;
     
     void trackCurrentPosition(StepperDirection direction);
 
+    long getCurrentPosition();
+    void resetCurrentPosition();
 
 private:
+    long _currentPosition;
 };
 
 #endif

@@ -1,4 +1,4 @@
-#include "tracker.h"
+#include "position.h"
 
 // -------------------------
 // ---- Constructor
@@ -6,15 +6,24 @@
 PositionTracker::PositionTracker(
     long currentPosition
     )
-    :   currentPosition(currentPosition)
+    :   _currentPosition(currentPosition)
         {}
 
 
 void PositionTracker::trackCurrentPosition(StepperDirection direction) {
   if (direction == COUNTER_CLOCKWISE) {
-    currentPosition--;
+    this->_currentPosition--;
   }
   if (direction == CLOCKWISE) {
-    currentPosition++;
+    this->_currentPosition++;
   }
 }
+
+long PositionTracker::getCurrentPosition() {
+  return this->_currentPosition;
+}
+
+void PositionTracker::resetCurrentPosition() {
+  this->_currentPosition = 0;
+}
+

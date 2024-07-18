@@ -3,8 +3,8 @@
 
 #include <math.h>
 
-enum EasingCurve {LINEAR, BEZIER, SINUSOIDAL, QUADRATIC, PARAMETRIC, CUBIC, QUARTIC, CIRCULAR};
+enum EasingType {LINEAR, BEZIER, SINUSOIDAL, QUADRATIC, PARAMETRIC, CUBIC, QUARTIC, CIRCULAR};
 
-float applyEasingCurve(EasingCurve easingCurve, float t);
+float applyEasingCurve(EasingType easingType, float t);
 
 #endif

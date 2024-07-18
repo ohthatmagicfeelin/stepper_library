@@ -4,26 +4,28 @@
 // ---- Constructor
 // -------------------------
 Easer::Easer(
-    EasingCurve easeType, 
-    Stepper motor, 
+    EasingType easeType, 
+    Stepper& motor, 
     float granularity, 
     float duration, 
-    float revolutions
+    float stepsToDestination
     )
     :   _easeType(easeType),
-        _motor(motor),
-        _dP{
-            revolutions,
-            _motor.getPulsePerRev(),
-            _getStepsToDestination(revolutions, _motor.getPulsePerRev())
-        },
-        _tP{
-            duration, 
-            granularity, 
-            _getGranularityPercent(duration, granularity),
-            _getGranularityMicroSeconds(granularity)
-            }
-        {}
+        _motor(motor)
+{
+    int pulsePerRev = _motor.resolution.getPulsePerRev();
+    _dP = {
+        pulsePerRev,
+        stepsToDestination
+    };
+    _tP = {
+        duration, 
+        granularity, 
+        _getGranularityPercent(duration, granularity),
+        _getGranularityMicroSeconds(granularity)
+    };
+}
+
 
 
 
@@ -55,9 +57,7 @@ float Easer::_getGranularityPercent(float duration, float granularity) {
 }
 
 
-float Easer::_getStepsToDestination(float revolutions, float stepsPerRev) {
-    return  stepsPerRev * revolutions;
-}
+
 
 
 
@@ -67,7 +67,7 @@ float Easer::_getStepsToDestination(float revolutions, float stepsPerRev) {
 float Easer::_calculateDeltaDisplacement(float tPercent, const float granularityPrecent) {
     float deltaT = tPercent - granularityPrecent;
     float currentDisplacePercent = applyEasingCurve(_easeType, tPercent); 
-    float previousDisplacePercent = applyEasingCurve(_easeType, constrain(deltaT, 0.0f, 1000.0f)); // no maximum constraint 
+    float previousDisplacePercent = applyEasingCurve(_easeType, constrain(deltaT, 0.0f, 100.0f)); // contrain to percent range
     float deltaD = currentDisplacePercent - previousDisplacePercent;
     return deltaD;
 }
@@ -85,12 +85,12 @@ long Easer::actuateEasing() {
     float stepsToDisplace = 0;
     float t = 0.0;
     long stepCount = 0;
-
     while (t < _tP.duration) {
         stepsToDisplace = _calculateEasing(t, _dP.stepsToDestination, _tP.duration);
         long stepPeriod = _microsecondsPerStep(stepsToDisplace, _tP.granularityMicroSeconds);
+
         t += _tP.granularity;
-        stepCount += stepsToDisplace;
+        stepCount += stepsToDisplace; // TODO: Replace this with the tracker class
         _motor.displaceBySteps(stepsToDisplace, stepPeriod);
     }
     return stepCount;

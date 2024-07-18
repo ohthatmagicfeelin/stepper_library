@@ -12,11 +12,11 @@ class Easer {
 
 public:
     Easer(
-        EasingCurve _easeType, 
-        Stepper motor,
+        EasingType _easeType, 
+        Stepper& motor,
         float granularity,
         float duration,
-        float revolutions
+        float stepsToDestination
     );
     
     long actuateEasing();
@@ -26,19 +26,18 @@ private:
     struct TimeParameters {
         float duration;
         float granularity;
-        const float granularityPercent;
-        const float granularityMicroSeconds;
+        float granularityPercent;
+        float granularityMicroSeconds;
     };
     struct DisplacementParameters {
-        float revolutions;
-        float stepsPerRev;
-        const float stepsToDestination;
+        int stepsPerRev;
+        float stepsToDestination;
     };
 
     TimeParameters _tP; 
     DisplacementParameters _dP; 
-    EasingCurve _easeType;
-    Stepper _motor;
+    EasingType _easeType;
+    Stepper& _motor;
 
     float _calculateEasing(float t, const float stepsToDestination, float duration);
     float _convertTimeToPercent(float currentTime, float totalTime);
@@ -48,6 +47,6 @@ private:
     float _microsecondsPerStep(float stepsToDisplace, float granularityMicroSeconds);
     float _getGranularityMicroSeconds(float granularity);
     float _getGranularityPercent(float duration, float granularity);
-    float _getStepsToDestination(float revolutions, float stepsPerRev);
+    float _getStepsToDestination(float revolutions, int stepsPerRev);
 };
 #endif

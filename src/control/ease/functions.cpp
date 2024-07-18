@@ -4,11 +4,6 @@
 // ---- Curve Deinitions
 // -------------------------
 
-float linear(float t) {
-    return t;
-}
-
-
 float bezier(float t) {
     return t * t * (3.0f - 2.0f * t);
 }
@@ -69,13 +64,25 @@ float circular(float t) {
 }
 
 
+float linear(float t) {
+    /*
+     * Applies a linear interpolation function with parametric easing at the start and end.
+     */
+    if (t <= 0.05) {
+        return parametric(t*10); // multiply by 10 to get t in range 0-0.5, getting to max valocity at 0.05
+    }
+    if (t >= 0.95) {
+        return parametric(t*10);
+    }
+    return t;
+}
 
 
 // --------------------------------
 // ---- Dispatcher/Wrapper Function
 // --------------------------------
-float applyEasingCurve(EasingCurve easingCurve, float t) {
-    switch (easingCurve) {
+float applyEasingCurve(EasingType easingType, float t) {
+    switch (easingType) {
         case LINEAR:
             return linear(t);
         case BEZIER:

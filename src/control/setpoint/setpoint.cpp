@@ -5,18 +5,17 @@ SetpointTracker::SetpointTracker(
     long setpoint,
     Stepper motor,
     bool (*exitCondition)(), // keep tracking setpoint until exit condition is true
-    long (*getSetpoint)(), // function to calculate setpoint, eg. reading a potentiometer.
-    int stepPulsePeriod
+    long (*getSetpoint)() // function to calculate setpoint, eg. reading a potentiometer.
+
     )
     :   _setpoint(setpoint),
-        _motorInstance(motor),
+        motor(motor),
         _exitCondition(exitCondition),
-        _getSetpoint(getSetpoint),
-        _stepPulsePeriod(stepPulsePeriod)
+        _getSetpoint(getSetpoint)
         {}
 
 long SetpointTracker::_calculatePositionError() {
-    return _setpoint - _positionTrackerInstance.currentPosition;
+    return _setpoint - motor.position.getCurrentPosition();
 }
 
 void SetpointTracker::_checkIfSetpointSatisfied() {
@@ -28,16 +27,14 @@ void SetpointTracker::_checkIfSetpointSatisfied() {
   }
 }
 
-
 void SetpointTracker::_updateDirection() {
   if (_calculatePositionError() > _setpointTolerance) {
-    _motorInstance.setDirection(CLOCKWISE);
+    motor.direction.setDirection(CLOCKWISE);
   }
   else if (_calculatePositionError() < -_setpointTolerance) {
-    _motorInstance.setDirection(COUNTER_CLOCKWISE);
+    motor.direction.setDirection(COUNTER_CLOCKWISE);
   }
 }
-
 
 void SetpointTracker::_updateRelayController() {
   _checkIfSetpointSatisfied();
@@ -45,7 +42,6 @@ void SetpointTracker::_updateRelayController() {
     _updateDirection();
   }
 }
-
 
 void SetpointTracker::_updateSetpointTracking() {
   _setpoint = _getSetpoint();
@@ -73,19 +69,16 @@ void SetpointTracker::_applyAcceleration() {
 
 
 void SetpointTracker::setpointTracking() {
-    
-    while(_exitCondition) { // digitalRead(selectButtonPin) == LOW
+    while(_exitCondition) {
       _updateSetpointTracking();
 
       while (!_isSetpointStatisfied) {
         _applyAcceleration();
         _updateSetpointTracking();
 
-        _positionTrackerInstance.trackCurrentPosition(_motorInstance.getDirection());
-        _motorInstance.step(_stepPulsePeriod);
+        motor.position.trackCurrentPosition(motor.direction.getDirection());
+        motor.step(_stepPulsePeriod);
       }
-
     }
-    delay(300); // debounce delay
-
+    delay(300);
 }
