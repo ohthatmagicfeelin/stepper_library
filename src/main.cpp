@@ -1,4 +1,6 @@
 
+// TODO: setpoint needs exit condition and pot testing
+// TODO: Easing function "period too small" issue needs to be fixed
 
 
 #include <Arduino.h>

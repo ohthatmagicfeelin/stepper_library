@@ -42,13 +42,6 @@ int Stepper::_validateStepPulsePeriod(int stepPulsePeriod) {
     }
     return stepPulsePeriod;
 }
-// int Stepper::_validateStepPulsePeriod(int stepPulsePeriod) {
-//     if (stepPulsePeriod < this->resolution.getMinPeriod()) {
-//         Serial.println(F("Period too small. See 'Min µs Delay' table in stepper.cpp"));
-//         return this->resolution.getMinPeriod();
-//     }
-//     return stepPulsePeriod;
-// }
 
 
 void Stepper::_step(int delayDuration) {
